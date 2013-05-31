@@ -1,0 +1,101 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+ 
+/* CAUTION: FOR BREVITY PURPOSES, THIS PROGRAM DOES NOT HAVE COMPLETE ERROR HANDLING */
+ 
+/* these are the tokens: language constructs and keywords are represented as numbers */
+#define VAR 1
+#define VARIABLE 2
+#define EQUAL 3
+#define STRING 4
+#define END_TOKEN 5
+#define YYCTYPE char
+ 
+/**
+ * this structure will hold pointers to beginning and end of the token string; the "lexeme"
+ * these pointers just point into the input buffer; they should not be freed.
+ */
+typedef struct lexeme_struct {
+  char *start;
+  char *current;
+} lexeme_t;
+ 
+/**
+ * this function will advance the lexeme start to the start of the next token; will advance current  to the
+ * end of the next token; and will return the token number that was encountered.
+ * The function will return END_TOKEN when the end of the string has been reached.
+ * Ideally, lexeme  start and current pointers should not be moved back by the caller while tokens are being read.
+ */
+int next_token(char *text, int textLength, lexeme_t* lexeme) {
+  if (lexeme->current >= (text + textLength)) {
+    return END_TOKEN;
+  }
+  lexeme->start = lexeme->current;
+ 
+/*!re2c
+re2c:define:YYCURSOR = lexeme->current;
+re2c:yyfill:enable = 0;
+re2c:indent:top = 1;
+ 
+ALPHANUMS = [a-zA-Z0-9]+;
+WHITESPACE = [ \t\v\f];
+ 
+"var" { return VAR; }
+"$" ALPHANUMS { return VARIABLE; }
+"=" { return EQUAL; }
+ 
+/*!ignore:re2c  this  rule to tokenize strings is not entirely correct; it won't handle escaped quotes.  
+The blog post contains a solution for escaping quotes.*/
+["]([^"]+)["] { return STRING; }
+WHITESPACE { lexeme->current++; }
+*/
+}
+ 
+int main() {
+  char *input = "var $name = \"My name is John\";";
+  int len = strlen(input);
+  int token = 0;
+  char *lexemeString = NULL;
+  lexeme_t lexeme;
+  lexeme.start = input;
+  lexeme.current = input;
+ 
+  /* start going through the tokens */
+  while (token = next_token(input, len, &lexeme)) {
+    switch (token) {
+    case VAR:
+      printf("Found VAR keyword at position %d\n", (int)(lexeme.start - input));
+      break;
+    case EQUAL:
+      printf("Found EQUAL sign at position %d\n", (int)(lexeme.start - input));
+      break;
+    case VARIABLE:
+      printf("Found variable at position %d. ", (int)(lexeme.start - input));
+ 
+      /* output the variable string by creating a new string from the lexeme's start and current pointer */
+      lexemeString = malloc(lexeme.current - lexeme.start + 1 + 1);
+      strncpy(lexemeString, lexeme.start, lexeme.current - lexeme.start + 1);
+      lexemeString[lexeme.current - lexeme.start + 1] = '\0';
+      printf("variable:%s\n", lexemeString);
+      free(lexemeString);
+      break;
+    case STRING:
+      printf("Found string at position %d. ", (int)(lexeme.start - input));
+ 
+      /* output the variable string by creating a new string from the lexeme's start and current pointer */
+      lexemeString = malloc(lexeme.current - lexeme.start + 1 + 1);
+      strncpy(lexemeString, lexeme.start, lexeme.current - lexeme.start + 1);
+      lexemeString[lexeme.current - lexeme.start + 1] = '\0';
+      printf("string:%s\n", lexemeString);
+      free(lexemeString);
+      break;
+    default:
+      break;
+    }
+    if (END_TOKEN == token) {
+      break;
+    }
+    lexeme.current++;
+  }
+}
