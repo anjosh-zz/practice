@@ -2,12 +2,12 @@
 
 int main(int argc, char *argv[])
 {
-	int i = 0;
-	
 	// go through each string in argv
-	// why am I skipping argv[0]?
-	for(i = 1; i < argc; i++) {
+
+	int i = 0;
+	while(i < argc) {
 		printf("arg %d: %s\n", i, argv[i]);
+		i++;
 	}
 
 	// let's make our own array of strings
@@ -15,10 +15,12 @@ int main(int argc, char *argv[])
 		"California", "Oregon",
 		"Washington", "Texas"
 	};
-	int num_states = 4;
 
-	for(i = 0; i < num_states; i++) {
+	int num_states = 4;
+	i = 0; // watch for this
+	while(i < num_states) {
 		printf("state %d: %s\n", i, states[i]);
+		i++;
 	}
 
 	return 0;
