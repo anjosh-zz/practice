@@ -3,7 +3,7 @@
 #include <errno.h>
 #include <string.h>
 
-/** Our old friend die from ex17. */
+/** Out old friend die from ex17. */
 void die(const char *message)
 {
 	if(errno) {
@@ -15,17 +15,23 @@ void die(const char *message)
 	exit(1);
 }
 
-// a typedef creates a fake type, in this
+// a typedef create s a fake type, in this
 // case for a function pointer
 typedef int (*compare_cb)(int a, int b);
 
+void swap (int *t1, int *t2)
+{
+	int temp = *t1;
+	*t1 = *t2;
+	*t2 = temp;
+}
+
 /**
- * A classic bubble sort function that uses the
+ * A classic bubble sort funciton that uses the
  * compare_cb to do the sorting.
  */
 int *bubble_sort(int *numbers, int count, compare_cb cmp)
 {
-	int temp = 0;
 	int i = 0;
 	int j = 0;
 	int *target = malloc(count * sizeof(int));
@@ -37,9 +43,7 @@ int *bubble_sort(int *numbers, int count, compare_cb cmp)
 	for(i = 0; i < count; i++) {
 		for(j = 0; j < count - 1; j++) {
 			if(cmp(target[j], target[j+1]) > 0) {
-				temp = target[j+1];
-				target[j+1] = target[j];
-				target[j] = temp;
+				swap(&target[j], &target[j+1]);
 			}
 		}
 	}
@@ -97,7 +101,7 @@ int main(int argc, char *argv[])
 	int *numbers = malloc(count * sizeof(int));
 	if(!numbers) die("Memory error.");
 
-	for(i = 0; i < count; i++) {
+	for (i = 0; i < count; i++) {
 		numbers[i] = atoi(inputs[i]);
 	}
 
@@ -109,3 +113,5 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
+
+
